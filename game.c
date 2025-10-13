@@ -1,100 +1,65 @@
+#include "snake.h"
 
-// TODO: Create Data structure for grid and display grid in terminal.
-// Create data structure
-// Print onto screen
+#include "utils.h"
 
-#include <stdio.h>
+#ifndef BOOL_H
+#define BOOL_H
+#include <stdbool.h>
+#endif
+
+#ifndef STDLIB_H
+#define STDLIB_H
 #include <stdlib.h>
+#endif
+
+#ifndef TIME_H
+#define TIME_H
 #include <time.h>
-
-#define GRID_SIZE 10
-struct Grid {
-  char grid[GRID_SIZE][GRID_SIZE];
-};
-
-// UTILITY Func
-void clear_screen(void);
-int rand_range(int min, int max);
+#endif
 
 // Game Func
-void place_fruit(struct Grid *grid_pointer);
-void init_player(struct Grid *grid_pointer);
-
-// GRID Func
-void blank_grid(struct Grid *grid_pointer);
-void assign_entity_to_grid_cell(struct Grid *grid_pointer, int row, int col,
-                                char entity);
-void draw(struct Grid *grid_pointer);
+void place_fruit(struct Grid *grid_p);
+void init_snake(struct Grid *grid_p, int (*s_segment_p)[GRID_SIZE * GRID_SIZE]);
 
 int main(void) {
   srand(time(NULL));
-  int game_loop = 1;
-  struct Grid grid = {.grid = {'\0'}};
-  struct Grid *grid_pointer = &grid;
 
-  blank_grid(grid_pointer);
+  struct Grid grid = {.grid = {{'\0'}}};
+  struct Grid *grid_p = &grid;
 
-  init_player(grid_pointer);
-  place_fruit(grid_pointer);
+  struct Snake snake = {.segment = {{0}}, .direction = LEFT};
+  int (*s_segment_p)[GRID_SIZE * GRID_SIZE] = snake.segment;
+  enum Input *s_direction_p = &snake.direction;
 
-  draw(grid_pointer);
+  blank_grid(grid_p);
+  init_snake(grid_p, s_segment_p);
+  place_fruit(grid_p);
+  draw(grid_p);
 
-  while (game_loop) {
-    // Continue here
+  while (true) {
+    delay(150);
+    move_snake(grid_p, s_segment_p, s_direction_p);
+    draw(grid_p);
   }
 
   return 0;
 }
 
-int rand_range(int min, int max) { return rand() % (max - min + 1) + min; }
-
-void assign_entity_to_grid_cell(struct Grid *grid_pointer, int row, int col,
-                                char entity) {
-  grid_pointer->grid[row][col] = entity;
-}
-
-void place_fruit(struct Grid *grid_pointer) {
+void place_fruit(struct Grid *grid_p) {
   int fruit_row = rand_range(1, GRID_SIZE - 3);
   int fruit_col = rand_range(1, GRID_SIZE - 3);
 
   if (fruit_row == (GRID_SIZE - 2) / 2 && fruit_col == (GRID_SIZE - 2) / 2) {
     fruit_col++;
   }
-  assign_entity_to_grid_cell(grid_pointer, fruit_row, fruit_col, 'o');
+
+  assign_entity_to_grid_cell(grid_p, fruit_row, fruit_col, 'o');
 }
 
-void init_player(struct Grid *grid_pointer) {
-  assign_entity_to_grid_cell(grid_pointer, (GRID_SIZE - 2) / 2,
-                             (GRID_SIZE - 2) / 2, '@');
-}
+void init_snake(struct Grid *grid_p,
+                int (*s_segment_p)[GRID_SIZE * GRID_SIZE]) {
+  s_segment_p[0][0] = (GRID_SIZE - 2) / 2;
+  s_segment_p[1][0] = (GRID_SIZE - 2) / 2;
 
-void blank_grid(struct Grid *grid_pointer) {
-  for (int row = 0; row < GRID_SIZE - 1; row++) {
-    for (int col = 0; col < GRID_SIZE - 1; col++) {
-      if (row < 1 || col < 1 || row > GRID_SIZE - 3 || col > GRID_SIZE - 3) {
-        grid_pointer->grid[row][col] = '#';
-      } else {
-        grid_pointer->grid[row][col] = '.';
-      }
-    }
-    printf("\n");
-  }
-}
-
-void clear_screen(void) {
-  // ANSI encoding for clear
-  printf("\033[H\033[2J");
-}
-
-void draw(struct Grid *grid_pointer) {
-
-  clear_screen();
-
-  for (int row = 0; row < GRID_SIZE - 1; row++) {
-    for (int col = 0; col < GRID_SIZE - 1; col++) {
-      printf("%2c", grid_pointer->grid[row][col]);
-    }
-    printf("\n");
-  }
-  return;
+  assign_entity_to_grid_cell(grid_p, s_segment_p[0][0], s_segment_p[1][0], '@');
 }
