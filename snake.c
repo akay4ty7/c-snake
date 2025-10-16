@@ -31,7 +31,9 @@ void move_snake_down(int (*s_segment_p)[GRID_SIZE * GRID_SIZE]) {
 
 void move_snake(struct Grid *grid_p, int (*s_segment_p)[GRID_SIZE * GRID_SIZE],
                 enum Input *s_direction_p) {
+
   grid_p->grid[s_segment_p[0][0]][s_segment_p[1][0]] = '.';
+
   switch (*s_direction_p) {
   case UP:
     move_snake_up(s_segment_p);

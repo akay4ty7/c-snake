@@ -1,5 +1,6 @@
 #include "snake.h"
 
+#include "inptlib.h"
 #include "utils.h"
 
 #ifndef BOOL_H
@@ -23,6 +24,7 @@ void init_snake(struct Grid *grid_p, int (*s_segment_p)[GRID_SIZE * GRID_SIZE]);
 
 int main(void) {
   srand(time(NULL));
+  enable_raw_mode();
 
   struct Grid grid = {.grid = {{'\0'}}};
   struct Grid *grid_p = &grid;
@@ -34,13 +36,36 @@ int main(void) {
   blank_grid(grid_p);
   init_snake(grid_p, s_segment_p);
   place_fruit(grid_p);
-  draw(grid_p);
+
+  char user_input;
 
   while (true) {
-    delay(150);
+    clear_screen();
+
+    user_input = get_input();
+
+    if (*s_direction_p != UP && user_input == 's') {
+      *s_direction_p = DOWN;
+    }
+
+    if (*s_direction_p != DOWN && user_input == 'w') {
+      *s_direction_p = UP;
+    }
+
+    if (*s_direction_p != RIGHT && user_input == 'a') {
+      *s_direction_p = LEFT;
+    }
+
+    if (*s_direction_p != LEFT && user_input == 'd') {
+      *s_direction_p = RIGHT;
+    }
+
     move_snake(grid_p, s_segment_p, s_direction_p);
+
     draw(grid_p);
+    delay(150);
   }
+  disable_raw_mode();
 
   return 0;
 }
