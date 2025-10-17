@@ -1,5 +1,4 @@
 #include "grid.h"
-#include "utils.h"
 
 #ifndef STDIO_H
 #define STDIO_H
@@ -20,7 +19,6 @@ void blank_grid(struct Grid *grid_p) {
         grid_p->grid[row][col] = '.';
       }
     }
-    printf("\n");
   }
 }
 

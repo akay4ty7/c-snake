@@ -1,55 +1,98 @@
 #include "snake.h"
+#include "grid.h"
 
-#ifndef STDIO_H
-#define STDIO_H
-#include <stdio.h>
-#endif
+void add_new_head(struct Snake *snake_p, int row, int col) {
+  snake_p->head = (snake_p->head + 1) % (GRID_SIZE * GRID_SIZE);
+  snake_p->segments[snake_p->head].row = row;
+  snake_p->segments[snake_p->head].col = col;
+  snake_p->length++;
 
-void move_snake_right(int (*s_segment_p)[GRID_SIZE * GRID_SIZE]) {
-  if (s_segment_p[1][0] < GRID_SIZE - 3) {
-    s_segment_p[1][0]++;
-  }
+  return;
 }
 
-void move_snake_left(int (*s_segment_p)[GRID_SIZE * GRID_SIZE]) {
-  if (s_segment_p[1][0] > 1) {
-    s_segment_p[1][0]--;
-  }
+void init_snake(struct Snake *snake_p, struct Grid *grid_p) {
+  int start_row = (GRID_SIZE - 2) / 2;
+  int start_col = (GRID_SIZE - 2) / 2;
+
+  init_snake_circular(snake_p, grid_p, start_row, start_col);
 }
 
-void move_snake_up(int (*s_segment_p)[GRID_SIZE * GRID_SIZE]) {
-  if (s_segment_p[0][0] > 1) {
-    s_segment_p[0][0]--;
-  }
+void init_snake_circular(struct Snake *snake_p, struct Grid *grid_p,
+                         int start_row, int start_col) {
+  snake_p->head = 0;
+  snake_p->tail = 0;
+  snake_p->length = 1;
+
+  snake_p->segments[0].row = start_row;
+  snake_p->segments[0].col = start_col;
+
+  assign_entity_to_grid_cell(grid_p, start_row, start_col, '@');
+
+  return;
 }
 
-void move_snake_down(int (*s_segment_p)[GRID_SIZE * GRID_SIZE]) {
-  if (s_segment_p[0][0] < GRID_SIZE - 3) {
-    s_segment_p[0][0]++;
-  }
+struct Position get_head_pos(struct Snake *snake_p) {
+  return snake_p->segments[snake_p->head];
 }
 
-void move_snake(struct Grid *grid_p, int (*s_segment_p)[GRID_SIZE * GRID_SIZE],
-                enum Input *s_direction_p) {
+struct Position get_tail_pos(struct Snake *snake_p) {
+  return snake_p->segments[snake_p->tail];
+}
 
-  grid_p->grid[s_segment_p[0][0]][s_segment_p[1][0]] = '.';
+void remove_tail(struct Snake *snake_p) {
+  snake_p->tail = (snake_p->tail + 1) % (GRID_SIZE * GRID_SIZE);
+  snake_p->length--;
+  return;
+}
 
-  switch (*s_direction_p) {
+int move_snake(struct Grid *grid_p, struct Snake *snake_p) {
+  struct Position current_head = get_head_pos(snake_p);
+
+  int ate_fruit = 0;
+  int new_row = current_head.row;
+  int new_col = current_head.col;
+
+  switch (snake_p->direction) {
   case UP:
-    move_snake_up(s_segment_p);
+    if (new_row > 1) {
+      new_row--;
+    }
     break;
   case DOWN:
-    move_snake_down(s_segment_p);
+    if (new_row < GRID_SIZE - 3) {
+      new_row++;
+    }
     break;
   case LEFT:
-    move_snake_left(s_segment_p);
+    if (new_col > 1) {
+      new_col--;
+    }
     break;
   case RIGHT:
-    move_snake_right(s_segment_p);
+    if (new_col < GRID_SIZE - 3) {
+      new_col++;
+    }
     break;
   default:
-    printf("Invalid\n");
     break;
   }
-  assign_entity_to_grid_cell(grid_p, s_segment_p[0][0], s_segment_p[1][0], '@');
+
+  // Check if position actually changed
+  if (new_row == current_head.row && new_col == current_head.col) {
+    return -1;
+  }
+
+  if (grid_p->grid[new_row][new_col] == 'o') {
+    ate_fruit = 1;
+  }
+
+  add_new_head(snake_p, new_row, new_col);
+
+  if (!ate_fruit) {
+    remove_tail(snake_p);
+  }
+
+  assign_entity_to_grid_cell(grid_p, new_row, new_col, '@');
+
+  return ate_fruit;
 }

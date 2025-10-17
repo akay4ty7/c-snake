@@ -2,11 +2,7 @@
 
 #include "inptlib.h"
 #include "utils.h"
-
-#ifndef BOOL_H
-#define BOOL_H
-#include <stdbool.h>
-#endif
+#include <stdio.h>
 
 #ifndef STDLIB_H
 #define STDLIB_H
@@ -20,7 +16,6 @@
 
 // Game Func
 void place_fruit(struct Grid *grid_p);
-void init_snake(struct Grid *grid_p, int (*s_segment_p)[GRID_SIZE * GRID_SIZE]);
 
 int main(void) {
   srand(time(NULL));
@@ -29,42 +24,60 @@ int main(void) {
   struct Grid grid = {.grid = {{'\0'}}};
   struct Grid *grid_p = &grid;
 
-  struct Snake snake = {.segment = {{0}}, .direction = LEFT};
-  int (*s_segment_p)[GRID_SIZE * GRID_SIZE] = snake.segment;
-  enum Input *s_direction_p = &snake.direction;
+  struct Snake snake = {.direction = LEFT, .head = 0, .tail = 0, .length = 0};
+  struct Snake *snake_p = &snake;
 
+  clear_screen();
   blank_grid(grid_p);
-  init_snake(grid_p, s_segment_p);
-  place_fruit(grid_p);
+  init_snake(snake_p, grid_p);
 
   char user_input;
 
-  while (true) {
-    clear_screen();
+  draw(grid_p);
+  place_fruit(grid_p);
+  hide_cursor();
 
+  while (1) {
     user_input = get_input();
 
-    if (*s_direction_p != UP && user_input == 's') {
-      *s_direction_p = DOWN;
+    struct Position old_tail = get_tail_pos(snake_p);
+
+    if (snake_p->direction != UP && user_input == 's') {
+      snake_p->direction = DOWN;
     }
 
-    if (*s_direction_p != DOWN && user_input == 'w') {
-      *s_direction_p = UP;
+    if (snake_p->direction != DOWN && user_input == 'w') {
+      snake_p->direction = UP;
     }
 
-    if (*s_direction_p != RIGHT && user_input == 'a') {
-      *s_direction_p = LEFT;
+    if (snake_p->direction != RIGHT && user_input == 'a') {
+      snake_p->direction = LEFT;
     }
 
-    if (*s_direction_p != LEFT && user_input == 'd') {
-      *s_direction_p = RIGHT;
+    if (snake_p->direction != LEFT && user_input == 'd') {
+      snake_p->direction = RIGHT;
     }
 
-    move_snake(grid_p, s_segment_p, s_direction_p);
+    int move_result = move_snake(grid_p, snake_p);
 
-    draw(grid_p);
+    if (move_result == 1) {
+      place_fruit(grid_p);
+    }
+
+    struct Position new_head = get_head_pos(snake_p);
+
+    if (move_result == 0) {
+      move_cursor(old_tail.row + 1, (old_tail.col * 2) + 2);
+      printf(".");
+    }
+    move_cursor(new_head.row + 1, (new_head.col * 2) + 2);
+    printf("@");
+    fflush(stdout);
+
     delay(150);
   }
+
+  show_cursor();
   disable_raw_mode();
 
   return 0;
@@ -79,12 +92,10 @@ void place_fruit(struct Grid *grid_p) {
   }
 
   assign_entity_to_grid_cell(grid_p, fruit_row, fruit_col, 'o');
-}
 
-void init_snake(struct Grid *grid_p,
-                int (*s_segment_p)[GRID_SIZE * GRID_SIZE]) {
-  s_segment_p[0][0] = (GRID_SIZE - 2) / 2;
-  s_segment_p[1][0] = (GRID_SIZE - 2) / 2;
+  move_cursor(fruit_row + 1, (fruit_col * 2) + 2);
+  printf("o");
+  fflush(stdout);
 
-  assign_entity_to_grid_cell(grid_p, s_segment_p[0][0], s_segment_p[1][0], '@');
+  return;
 }
