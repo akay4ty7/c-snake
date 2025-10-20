@@ -15,6 +15,8 @@ void init_snake(struct Snake *snake_p, struct Grid *grid_p) {
   int start_col = (GRID_SIZE - 2) / 2;
 
   init_snake_circular(snake_p, grid_p, start_row, start_col);
+
+  return;
 }
 
 void init_snake_circular(struct Snake *snake_p, struct Grid *grid_p,
@@ -51,6 +53,7 @@ int move_snake(struct Grid *grid_p, struct Snake *snake_p) {
   int ate_fruit = 0;
   int new_row = current_head.row;
   int new_col = current_head.col;
+  int snake_tail_index = 0;
 
   switch (snake_p->direction) {
   case UP:
@@ -77,9 +80,17 @@ int move_snake(struct Grid *grid_p, struct Snake *snake_p) {
     break;
   }
 
-  // Check if position actually changed
   if (new_row == current_head.row && new_col == current_head.col) {
     return -1;
+  }
+
+  snake_tail_index = snake_p->tail;
+  while (snake_tail_index != snake_p->head) {
+    if (snake_p->segments[snake_tail_index].row == new_row &&
+        snake_p->segments[snake_tail_index].col == new_col) {
+      return -1;
+    }
+    snake_tail_index = (snake_tail_index + 1) % (GRID_SIZE * GRID_SIZE);
   }
 
   if (grid_p->grid[new_row][new_col] == 'o') {

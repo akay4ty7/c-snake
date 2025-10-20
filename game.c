@@ -19,7 +19,6 @@ void place_fruit(struct Grid *grid_p);
 
 int main(void) {
   srand(time(NULL));
-  enable_raw_mode();
 
   struct Grid grid = {.grid = {{'\0'}}};
   struct Grid *grid_p = &grid;
@@ -27,20 +26,26 @@ int main(void) {
   struct Snake snake = {.direction = LEFT, .head = 0, .tail = 0, .length = 0};
   struct Snake *snake_p = &snake;
 
+  struct Position old_tail = {.row = 0, .col = 0};
+  struct Position new_head = {.row = 0, .col = 0};
+
+  int move_result = 0;
+
+  enable_raw_mode();
+
   clear_screen();
   blank_grid(grid_p);
   init_snake(snake_p, grid_p);
 
   char user_input;
 
-  draw(grid_p);
+  draw_grid(grid_p);
   place_fruit(grid_p);
   hide_cursor();
 
   while (1) {
     user_input = get_input();
-
-    struct Position old_tail = get_tail_pos(snake_p);
+    old_tail = get_tail_pos(snake_p);
 
     if (snake_p->direction != UP && user_input == 's') {
       snake_p->direction = DOWN;
@@ -58,22 +63,22 @@ int main(void) {
       snake_p->direction = RIGHT;
     }
 
-    int move_result = move_snake(grid_p, snake_p);
+    move_result = move_snake(grid_p, snake_p);
 
     if (move_result == 1) {
       place_fruit(grid_p);
     }
 
-    struct Position new_head = get_head_pos(snake_p);
+    new_head = get_head_pos(snake_p);
 
     if (move_result == 0) {
       move_cursor(old_tail.row + 1, (old_tail.col * 2) + 2);
       printf(".");
     }
+
     move_cursor(new_head.row + 1, (new_head.col * 2) + 2);
     printf("@");
     fflush(stdout);
-
     delay(150);
   }
 

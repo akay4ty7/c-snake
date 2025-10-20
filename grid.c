@@ -22,7 +22,7 @@ void blank_grid(struct Grid *grid_p) {
   }
 }
 
-void draw(struct Grid *grid_p) {
+void draw_grid(struct Grid *grid_p) {
   for (int row = 0; row < GRID_SIZE - 1; row++) {
     for (int col = 0; col < GRID_SIZE - 1; col++) {
       printf("%2c", grid_p->grid[row][col]);
