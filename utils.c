@@ -29,6 +29,12 @@ void clear_screen(void) {
   return;
 }
 
+void clear_input_buffer(void) {
+  while (getchar() != '\n') {
+  }
+  return;
+}
+
 void hide_cursor(void) {
   printf("\033[?25l");
   return;

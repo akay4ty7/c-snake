@@ -2,6 +2,9 @@
 #define GRID_H
 
 #define GRID_SIZE 20
+#define FLOOR_CELL ' '
+#define WALL_CELL '#'
+#define FRUIT_CELL 'F'
 
 struct Grid {
   char grid[GRID_SIZE][GRID_SIZE];

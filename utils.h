@@ -6,6 +6,7 @@ void hide_cursor(void);
 void show_cursor(void);
 void clear_screen(void);
 void delay(int ms);
+void clear_input_buffer();
 int rand_range(int min, int max);
 
 #endif

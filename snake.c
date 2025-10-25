@@ -28,7 +28,7 @@ void init_snake_circular(struct Snake *snake_p, struct Grid *grid_p,
   snake_p->segments[0].row = start_row;
   snake_p->segments[0].col = start_col;
 
-  assign_entity_to_grid_cell(grid_p, start_row, start_col, '@');
+  assign_entity_to_grid_cell(grid_p, start_row, start_col, SNAKE_CELL);
 
   return;
 }
@@ -85,6 +85,7 @@ int move_snake(struct Grid *grid_p, struct Snake *snake_p) {
   }
 
   snake_tail_index = snake_p->tail;
+
   while (snake_tail_index != snake_p->head) {
     if (snake_p->segments[snake_tail_index].row == new_row &&
         snake_p->segments[snake_tail_index].col == new_col) {
@@ -93,7 +94,7 @@ int move_snake(struct Grid *grid_p, struct Snake *snake_p) {
     snake_tail_index = (snake_tail_index + 1) % (GRID_SIZE * GRID_SIZE);
   }
 
-  if (grid_p->grid[new_row][new_col] == 'o') {
+  if (grid_p->grid[new_row][new_col] == FRUIT_CELL) {
     ate_fruit = 1;
   }
 
@@ -103,7 +104,7 @@ int move_snake(struct Grid *grid_p, struct Snake *snake_p) {
     remove_tail(snake_p);
   }
 
-  assign_entity_to_grid_cell(grid_p, new_row, new_col, '@');
+  assign_entity_to_grid_cell(grid_p, new_row, new_col, SNAKE_CELL);
 
   return ate_fruit;
 }

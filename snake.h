@@ -4,6 +4,8 @@
 #ifndef SNAKE_H
 #define SNAKE_H
 
+#define SNAKE_CELL '@'
+
 struct Position {
   int row;
   int col;
